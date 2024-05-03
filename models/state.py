@@ -1,41 +1,33 @@
 #!/usr/bin/python3
 """This is the state class"""
-import models
-from models.base_model import BaseModel, Base
-from models.city import City
-from os import getenv
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from models.base_model import BaseModel, Base
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
+import models
+from models.city import City
+import shlex
+from os import getenv
 
 
 class State(BaseModel, Base):
     """This is the class for State
-
     Attributes:
         name: input name
-
     """
-
     __tablename__ = "states"
+    name = Column(String(128), nullable=False)
+    cities = relationship("City", backref="state", cascade="delete")
 
-    if getenv('HBNB_TYPE_STORAGE') == 'db':
-        name = Column(String(128), nullable=False)
-        cities = relationship('City', backref='state',
-                              cascade='all, delete-orphan')
-    else:
-        name = ''
-
+    if getenv('HBNB_TYPE_STORAGE') != 'db':
         @property
         def cities(self):
-            """Returns the list of `City` instances
-            with `state_id` equals to the current
+            """get a list of all related city instances
+            with state_id = to the current state id
             """
+            cities_list = []
 
-            cities = list()
-
-            for _id, city in models.storage.all(City).items():
+            for city in list(models.storage.all(City).values()):
                 if city.state_id == self.id:
-                    cities.append(city)
-
-            return cities
+                    cities_list.append(city)
+            return cities_list
