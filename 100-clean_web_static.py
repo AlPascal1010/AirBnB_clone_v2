@@ -1,44 +1,22 @@
 #!/usr/bin/python3
-
-"""
-With Fabric , creates a tgz archive
-from web_static content folder
-"""
-
-from fabric.api import env, local, put, run
-from datetime import datetime
-from os.path import exists, isdir
-env.hosts = ['52.87.216.210', '100.25.15.111']
+""" Function that deploys """
+from fabric.api import *
 
 
-def local_clean(number=0):
-    """Local Clean"""
-    fd_list = local('ls -1t versions', capture=True)
-    fd_list = fd_list.split('\n')
-    n = int(number)
-    if n in (0, 1):
-        n = 1
-    print(len(fd_list[n:]))
-    for i in fd_list[n:]:
-        local('rm versions/' + i)
-
-
-def remote_clean(number=0):
-    """Remote Clean"""
-    fd_list = run('ls -1t /data/web_static/releases')
-    fd_list = fd_list.split('\r\n')
-    print(fd_list)
-    n = int(number)
-    if n in (0, 1):
-        n = 1
-    print(len(fd_list[n:]))
-    for i in fd_list[n:]:
-        if i is 'test':
-            continue
-        run('rm -rf /data/web_static/releases/' + i)
+env.hosts = ['44.210.150.159', '35.173.47.15']
+env.user = "ubuntu"
 
 
 def do_clean(number=0):
-    """Fabric script that deletes aout of dates archives"""
-    local_clean(number)
-    remote_clean(number)
+    """ CLEANS """
+
+    number = int(number)
+
+    if number == 0:
+        number = 2
+    else:
+        number += 1
+
+    local('cd versions ; ls -t | tail -n +{} | xargs rm -rf'.format(number))
+    path = '/data/web_static/releases'
+    run('cd {} ; ls -t | tail -n +{} | xargs rm -rf'.format(path, number))
