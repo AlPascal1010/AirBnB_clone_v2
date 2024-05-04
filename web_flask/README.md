@@ -1,1 +1,1 @@
-# 0x04. AirBnB clone - Web framework
+# Web flask extension of AirBnB clone project
